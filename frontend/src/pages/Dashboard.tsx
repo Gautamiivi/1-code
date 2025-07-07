@@ -47,7 +47,7 @@ const Dashboard = () => {
   return (
     <Box sx={{ p: 2, height: "calc(100vh - 80px)" }}>
       <Typography variant="h4" gutterBottom>
-        Employee profile dashboard
+        Employee Profile Dashboard
       </Typography>
       <Split
         className="split"
