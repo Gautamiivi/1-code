@@ -1,5 +1,9 @@
-export interface CreateUserDTO {
-    name: string;
-    email: string;
-    password: string;
+import "express";
+
+declare module "express-serve-static-core" {
+  interface Request {
+    user?: {
+      userId: string;
+    };
+  }
 }

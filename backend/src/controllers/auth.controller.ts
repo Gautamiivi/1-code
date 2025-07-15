@@ -1,29 +1,32 @@
-import { Request, Response } from 'express';
-import jwt, { Secret } from 'jsonwebtoken';
-import { User } from '../models/User.model';
+import { Request, Response } from "express";
+import User from "../models/User.model";
+import { registerUser, loginUser } from "../services/user.service";
 
-const JWT_SECRET: Secret = process.env.JWT_SECRET as string;
-const JWT_EXPIRES_IN = Number(process.env.JWT_EXPIRES_IN ?? '3600');
+export const register = async (req: Request, res: Response) => {
+  const result = await registerUser(req.body);
+  res.status(result.status).json(result.data);
+};
 
 export const login = async (req: Request, res: Response) => {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-        res.status(400).json({ error: 'Email and password are required' });
+  const result = await loginUser(req.body);
+  res.status(result.status).json(result.data);
+};
+// ✅ Get logged-in user profile
+export const getMe = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.userId; // 👈 From protect middleware
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const user = await User.findOne({ email });
-
-    if (!user || user.password !== password) {
-        res.status(401).json({ error: 'Invalid credentials' });
-        return
+    const user = await User.findById(userId).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
 
-    const token = jwt.sign(
-        { id: user._id, email: user.email },
-        JWT_SECRET,
-        { expiresIn: JWT_EXPIRES_IN }
-    );
-
-    res.status(200).json({ token });
+    res.json(user);
+  } catch (err) {
+    console.error("Error in getMe:", err);
+    res.status(500).json({ message: "Server error" });
+  }
 };

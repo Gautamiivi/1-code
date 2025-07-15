@@ -8,7 +8,7 @@ const InProgress = () => {
   const activeTask = tasks.find((t) => t.id === activeTaskId);
 
   useEffect(() => {
-    let interval: NodeJS.Timer;
+    let interval: ReturnType<typeof setInterval>;
 
     if (activeTask) {
       interval = setInterval(() => {

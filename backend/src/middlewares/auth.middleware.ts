@@ -1,27 +1,35 @@
-import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
+import { Request, Response, NextFunction } from "express";
+import jwt, { JwtPayload as DefaultJwtPayload } from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET || 'default_secret';
-
-export interface AuthRequest extends Request {
-    user?: any; // optionally add more user info
+// ✅ Define custom JWT payload type
+interface JwtPayload extends DefaultJwtPayload {
+  userId: string;
 }
 
-export const verifyToken = (req: AuthRequest, res: Response, next: NextFunction) => {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        res.status(401).json({ error: 'No token provided' });
-        return
+// ✅ Extend Express Request globally
+declare global {
+  namespace Express {
+    interface Request {
+      user?: JwtPayload;
     }
+  }
+}
 
-    const token = authHeader.split(' ')[1];
+export const protect = (req: Request, res: Response, next: NextFunction): void => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.split(" ")[1];
 
-    try {
-        const decoded = jwt.verify(token, JWT_SECRET);
-        req.user = decoded;
-        next();
-    } catch (error) {
-        res.status(401).json({ error: 'Invalid or expired token' });
-    }
+  if (!token) {
+    res.status(401).json({ message: "Not authorized, token missing" });
+    return;
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
+    req.user = decoded; // ✅ Attach user to request
+    next();
+  } catch (error) {
+    console.error("JWT verification error:", error);
+    res.status(401).json({ message: "Not authorized, invalid token" });
+  }
 };
