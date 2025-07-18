@@ -21,7 +21,7 @@ const getTheme = (mode: "light" | "dark") =>
       mode,
       primary: {
         main: "#1976d2",
-        light: "#90caf9",
+        light: "#c0dcf3ff",
         dark: "#1565c0",
       },
       background: {

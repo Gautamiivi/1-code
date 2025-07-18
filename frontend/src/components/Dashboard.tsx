@@ -16,7 +16,9 @@ import {
   Avatar,
   CircularProgress,
 } from "@mui/material";
-import { Brightness4, Brightness7 } from "@mui/icons-material";
+import { Brightness4, Brightness7, CalendarToday, Videocam, VideocamOff } from "@mui/icons-material";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import { useColorMode } from "../themes/ColorModeContext";
 import { useNavigate } from "react-router-dom";
 import api from "../utils/axios";
@@ -37,6 +39,9 @@ const Dashboard = () => {
 
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loadingUser, setLoadingUser] = useState(true);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+  const [meetingTime, setMeetingTime] = useState(0);
+  const [isMeeting, setIsMeeting] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -46,13 +51,15 @@ const Dashboard = () => {
       } catch (err) {
         console.error("Failed to fetch user profile:", err);
         setUser(null);
+        localStorage.removeItem("token"); // 🆕 logout if token is invalid
+        navigate("/login", { replace: true });
       } finally {
         setLoadingUser(false);
       }
     };
 
     fetchUser();
-  }, []);
+  }, [navigate]);
 
   const handleProfileClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -64,16 +71,51 @@ const Dashboard = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    window.dispatchEvent(new Event("storage"));
     navigate("/login", { replace: true });
   };
+
+  const handleMeetingToggle = () => {
+    setIsMeeting((prev) => !prev);
+  };
+
+  useEffect(() => {
+    let interval: ReturnType<typeof setInterval> | undefined;
+    if (isMeeting) {
+      interval = setInterval(() => {
+        setMeetingTime((prev) => prev + 1);
+      }, 1000);
+    }
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [isMeeting]);
 
   const getInitials = (email: string, name?: string): string => {
     if (name) return name[0].toUpperCase();
     return email ? email[0].toUpperCase() : "U";
   };
 
+  if (loadingUser) {
+    return (
+      <Box
+        sx={{
+          height: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          bgcolor: "background.default",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
-    <TaskProvider>
+    <TaskProvider selectedDate={selectedDate} isMeeting={isMeeting}>
       <Box
         sx={{
           height: "100vh",
@@ -102,6 +144,27 @@ const Dashboard = () => {
 
           {/* Right Icons */}
           <Box sx={{ display: "flex", alignItems: "center" }}>
+            {/* Meeting Timer */}
+            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", mr: 2 }}>
+              <IconButton onClick={handleMeetingToggle} color="inherit">
+                {isMeeting ? <VideocamOff /> : <Videocam />}
+              </IconButton>
+              {isMeeting && (
+                <Typography variant="caption">
+                  {new Date(meetingTime * 1000).toISOString().substr(11, 8)}
+                </Typography>
+              )}
+            </Box>
+            {/* Date Picker */}
+            <DatePicker
+              selected={selectedDate}
+              onChange={(date) => setSelectedDate(date)}
+              customInput={
+                <IconButton color="inherit">
+                  <CalendarToday />
+                </IconButton>
+              }
+            />
             {/* Theme Toggle */}
             <IconButton onClick={toggleColorMode} color="inherit">
               {theme.palette.mode === "dark" ? <Brightness7 /> : <Brightness4 />}
@@ -113,13 +176,9 @@ const Dashboard = () => {
               color="inherit"
               sx={{ ml: 1 }}
             >
-              {loadingUser ? (
-                <CircularProgress size={24} />
-              ) : (
-                <Avatar sx={{ bgcolor: "primary.main" }}>
-                  {getInitials(user?.email ?? "", user?.name)}
-                </Avatar>
-              )}
+              <Avatar sx={{ bgcolor: "primary.main" }}>
+                {getInitials(user?.email ?? "", user?.name)}
+              </Avatar>
             </IconButton>
 
             {/* Profile Menu */}
@@ -142,7 +201,7 @@ const Dashboard = () => {
 
         {/* ✅ Split Layout */}
         <Split
-          sizes={[20, 25, 20, 20, 15]}
+          sizes={[20, 22, 20, 19, 19]}
           minSize={200}
           gutterSize={8}
           className="split"

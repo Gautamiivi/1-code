@@ -3,29 +3,27 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "proxy": "http://localhost:3300"
-
-,
-
+  "proxy": "http://localhost:3300",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
-
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^7.2.0",
     "@mui/material": "^7.2.0",
+    "@types/react-datepicker": "^6.2.0",
     "axios": "^1.10.0",
     "react": "^19.1.0",
+    "react-datepicker": "^8.4.0",
     "react-dom": "^19.1.0",
     "react-grid-layout": "^1.5.2",
     "react-resizable": "^3.0.5",
-    "react-split": "^2.0.14",
-    "react-split-pane": "^0.1.92"
+    "react-router-dom": "^7.6.3",
+    "react-split": "^2.0.14"
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",

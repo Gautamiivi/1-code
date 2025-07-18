@@ -14,15 +14,15 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 interface TaskCardProps {
-  id: number;
+  _id: string;
   ticketNo: string;
   title: string;
   timeSpent: number;
-  status: string;
+  status: "addTask" | "inProgress" | "pending" | "qa" | "done";
 }
 
 const TaskCard: React.FC<TaskCardProps> = ({
-  id,
+  _id,
   ticketNo,
   title,
   timeSpent,
@@ -60,7 +60,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
               <IconButton
                 size="small"
                 color="primary"
-                onClick={() => moveTask(id, "inProgress")}
+                onClick={() => moveTask(String(_id), "inProgress")}
                 title="Start Working"
               >
                 <PlayArrowIcon />
@@ -68,7 +68,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
               <IconButton
                 size="small"
                 color="error"
-                onClick={() => deleteTask(id)}
+                onClick={() => deleteTask(String(_id))}
                 title="Delete Task"
               >
                 <DeleteIcon />
@@ -79,7 +79,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
               <IconButton
                 size="small"
                 color={status === "inProgress" ? "primary" : "default"}
-                onClick={() => moveTask(id, "inProgress")}
+                onClick={() => moveTask(String(_id), "inProgress")}
                 title="Move to In Progress"
               >
                 <PlayArrowIcon />
@@ -87,7 +87,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
               <IconButton
                 size="small"
                 color={status === "pending" ? "warning" : "default"}
-                onClick={() => moveTask(id, "pending")}
+                onClick={() => moveTask(String(_id), "pending")}
                 title="Move to Pending"
               >
                 <PauseIcon />
@@ -95,7 +95,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
               <IconButton
                 size="small"
                 color={status === "qa" ? "secondary" : "default"}
-                onClick={() => moveTask(id, "qa")}
+                onClick={() => moveTask(String(_id), "qa")}
                 title="Move to QA"
               >
                 <BugReportIcon />
@@ -103,7 +103,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
               <IconButton
                 size="small"
                 color={status === "done" ? "success" : "default"}
-                onClick={() => moveTask(id, "done")}
+                onClick={() => moveTask(String(_id), "done")}
                 title="Move to Done"
               >
                 <CheckCircleIcon />

@@ -15,7 +15,7 @@ const Pending = () => {
         <Stack spacing={1}>
           {pendingTasks.length > 0 ? (
             pendingTasks.map((task) => (
-              <TaskCard key={task.id} {...task} />
+              <TaskCard key={task._id} {...task} />
             ))
           ) : (
             <Typography className="no-tasks">

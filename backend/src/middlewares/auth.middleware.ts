@@ -3,7 +3,7 @@ import jwt, { JwtPayload as DefaultJwtPayload } from "jsonwebtoken";
 
 // ✅ Define custom JWT payload type
 interface JwtPayload extends DefaultJwtPayload {
-  userId: string;
+  _id: string;
 }
 
 // ✅ Extend Express Request globally

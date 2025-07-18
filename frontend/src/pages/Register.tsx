@@ -1,41 +1,59 @@
 import { useState } from "react";
-import { TextField, Button, Typography, Stack, Container } from "@mui/material";
+import {
+  TextField,
+  Button,
+  Typography,
+  Stack,
+  Container,
+  CircularProgress,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import api from "../utils/axios"; // ✅ Pre-configured Axios instance
 
 const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleRegister = async () => {
+    setLoading(true);
     try {
-      const res = await api.post("/auth/register", {
-        email,
-        password,
-      });
+      const res = await api.post("/auth/register", { email, password });
 
-      if (res && res.data && res.data.token) {
-        // ✅ Save JWT token to localStorage
-        localStorage.setItem("token", res.data.token);
+      const { token, user, message } = res.data;
 
-        alert("Registration successful! You are now logged in.");
-        navigate("/dashboard"); // ✅ Redirect to dashboard
+      if (token && user) {
+        // ✅ Save token & user in localStorage
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify(user));
+
+        alert(message || "Registration successful! You are now logged in.");
+        navigate("/dashboard");
       } else {
         alert("Unexpected response from server");
-        console.error("Unexpected response:", res);
+        console.error("Unexpected response:", res.data);
       }
     } catch (err: any) {
       console.error("Registration error:", err);
-
-      if (err.response) {
-        alert(err.response.data.message || "Registration failed");
+      if (err.response?.data) {
+        const errorMessage =
+          err.response.data.message ||
+          err.response.data.error ||
+          "Registration failed";
+        alert(errorMessage);
       } else if (err.request) {
         alert("No response from server. Check your backend.");
       } else {
         alert("Error: " + err.message);
       }
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const handleNavigateToLogin = () => {
+    navigate("/login");
   };
 
   return (
@@ -57,12 +75,25 @@ const Register = () => {
           onChange={(e) => setPassword(e.target.value)}
           fullWidth
         />
+
+        {/* ✅ Register Button */}
         <Button
           variant="contained"
+          color="primary"
           onClick={handleRegister}
-          disabled={!email || !password}
+          disabled={!email || !password || loading}
         >
-          Register
+          {loading ? <CircularProgress size={24} color="inherit" /> : "Register"}
+        </Button>
+
+        {/* ✅ Already have an account? */}
+        <Button
+          variant="outlined"
+          color="secondary"
+          onClick={handleNavigateToLogin}
+          disabled={loading}
+        >
+          Already have an account? Login
         </Button>
       </Stack>
     </Container>

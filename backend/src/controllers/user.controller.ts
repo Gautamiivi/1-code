@@ -1,31 +1,20 @@
 import { Request, Response } from "express";
 import User from "../models/User.model";
 
-// ✅ Already existing
-export const register = async (req: Request, res: Response) => {
-  // your register logic
-};
-
-export const login = async (req: Request, res: Response) => {
-  // your login logic
-};
-
-// ✅ NEW: Get logged-in user profile
-export const getMe = async (req: Request, res: Response) => {
+export const updateMeetingTime = async (req: Request, res: Response) => {
   try {
-    const userId = req.user?.userId; // ⬅️ userId set by protect middleware
+    const userId = req.user?._id;
+    const { isMeeting, meetingStartTime } = req.body;
+
     if (!userId) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ error: "Unauthorized: User ID missing" });
     }
 
-    const user = await User.findById(userId).select("-password");
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+    await User.findByIdAndUpdate(userId, { isMeeting, meetingStartTime });
 
-    res.json(user);
+    res.status(200).json({ message: "Meeting state updated successfully" });
   } catch (err) {
-    console.error("Error fetching user profile:", err);
-    res.status(500).json({ message: "Server error" });
+    console.error("❌ Error in updateMeetingTime:", err);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };

@@ -5,14 +5,14 @@ import TaskCard from "./TaskCard";
 
 const InProgress = () => {
   const { tasks, activeTaskId, incrementTime } = useTaskContext();
-  const activeTask = tasks.find((t) => t.id === activeTaskId);
+  const activeTask = tasks.find((t) => t._id === activeTaskId);
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
 
     if (activeTask) {
       interval = setInterval(() => {
-        incrementTime(activeTask.id);
+        incrementTime(activeTask._id);
       }, 1000);
     }
 
